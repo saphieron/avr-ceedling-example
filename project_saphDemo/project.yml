@@ -7,9 +7,9 @@
 
 :project:
   :use_exceptions: FALSE
-  :use_test_preprocessor: TRUE
+  :use_test_preprocessor: FALSE
   :use_auxiliary_dependencies: TRUE
-  :use_mocks: FALSE
+  :use_mocks: TRUE
   :build_root: build
 #  :release_build: TRUE
   :test_file_prefix: test_
@@ -24,13 +24,15 @@
 
 :environment:
   - :mcu: atmega2560
+  - :mcupart: m2560
   - :f_cpu: 16000000UL 
-  - :serial_port: /dev/ttyACM2  #change this to the serial port you are using!!!
+  - :serial_port: /dev/ttyACM1  #change this to the serial port you are using!!!
   - :objcopy: avr-objcopy
   - :programmer: wiring
+  - :baud: 9600
 
 :extension:
-  :executable: .hex
+  :executable: .elf
 
 :paths:
   :test:
@@ -68,6 +70,9 @@
     uint32:   UINT32
     int8:     INT8
     bool:     UINT8
+  :defines:
+    - CMOCK_MEM_DYNAMIC
+
 
 :gcov:
     :html_report_type: basic
@@ -77,7 +82,6 @@
     :executable: avr-gcc
     :name: 'avr compiler, used for testing'
     :arguments:
-
       - -c ${1}
       - -o ${2}
       - -DF_CPU=#{ENV['F_CPU']}
@@ -86,36 +90,38 @@
       - -I"$": COLLECTION_PATHS_TEST_SUPPORT_SOURCE_INCLUDE_VENDOR   #expands to -I search paths
       - -D$: COLLECTION_DEFINES_TEST_AND_VENDOR
       - -Wall
-      - -Os
+      - -fpack-struct
+      - -fshort-enums
+      - -ffunction-sections
+      - -fdata-sections
+      - -std=c99
+      - -funsigned-char
+      - -funsigned-bitfields
+      - -DBAUD=#{ENV['BAUD']}
+      - -O2
   :test_linker:
     :executable: avr-gcc
     :arguments:
+      - -Wl,-Map,MemMapping.map
       - -mmcu=#{ENV['MCU']}
       - -L"$": COLLECTION_PATHS_SUPPORT
       - ${1}
-      - -o ${2}.hex
+      - -o ${2}
       - -lAvrUnitySupport
-  # :test-fixture:
-  #   :executable: ./upload_hex_to_target.sh
-  #   :arguments:
-  #     - -p "#{ENV['MCU']}"
-  #     - -c "#{ENV['programmer']}"
-  #     - -D
-  #     - -P "#{ENV['serial_port']}"
-  #     - -U "${1}"
+  :test_fixture:
+    :executable: ./upload_hex_to_target.sh
+    :name: 'script to upload to target and receive test results'
+    :arguments:
+      - -p=#{ENV['MCU']}
+      - -c=#{ENV['PROGRAMMER']}
+      - -D
+      - -P=#{ENV['SERIAL_PORT']}
+      - -U=${1}
 
 
 :unity: #itty bitty processor & toolchain with limited test execution options
   :defines:
-    - UNITY_INT_WIDTH=16           #16 bit processor without support for 32 bit instructions
-    - UNITY_EXCLUDE_FLOAT
-    - 'UNITY_OUTPUT_START()=uart_init(F_CPU, BAUD)'
-    - 'UNITY_OUTPUT_CHAR(a)=uart_putchar(a)'
-    - 'UNITY_OUTPUT_COMPLETE()=uart_complete()'
-#:tools:
-# Ceedling defaults to using gcc for compiling, linking, etc.
-# As [:tools] is blank, gcc will be used (so long as it's in your system path)
-# See documentation to configure a given toolchain for use
+    - UNITY_INCLUDE_CONFIG_H
 
 # LIBRARIES
 # These libraries are automatically injected into the build process. Those specified as

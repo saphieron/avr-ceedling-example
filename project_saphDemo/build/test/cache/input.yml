@@ -1,10 +1,10 @@
 ---
 :project:
   :use_exceptions: false
-  :use_mocks: false
+  :use_mocks: true
   :compile_threads: 1
   :test_threads: 1
-  :use_test_preprocessor: true
+  :use_test_preprocessor: false
   :use_deep_dependencies: false
   :test_file_prefix: test_
   :options_paths: []
@@ -38,10 +38,12 @@
 :environment:
 - :rake_columns: '120'
 - :mcu: atmega2560
+- :mcupart: m2560
 - :f_cpu: 16000000UL
-- :serial_port: "/dev/ttyACM2"
+- :serial_port: "/dev/ttyACM1"
 - :objcopy: avr-objcopy
 - :programmer: wiring
+- :baud: '9600'
 :defines:
   :test:
   - &1 []
@@ -69,7 +71,7 @@
   :source: ".c"
   :assembly: ".s"
   :object: ".o"
-  :executable: ".hex"
+  :executable: ".elf"
   :map: ".map"
   :list: ".lst"
   :testpass: ".pass"
@@ -78,14 +80,11 @@
 :unity:
   :vendor_path: "/home/saphieron/git/avr-ceedling-example/project_saphDemo/vendor/ceedling/vendor"
   :defines:
-  - UNITY_INT_WIDTH=16
-  - UNITY_EXCLUDE_FLOAT
-  - UNITY_OUTPUT_START()=uart_init(F_CPU, BAUD)
-  - UNITY_OUTPUT_CHAR(a)=uart_putchar(a)
-  - UNITY_OUTPUT_COMPLETE()=uart_complete()
+  - UNITY_INCLUDE_CONFIG_H
 :cmock:
   :vendor_path: "/home/saphieron/git/avr-ceedling-example/project_saphDemo/vendor/ceedling/vendor"
-  :defines: []
+  :defines:
+  - CMOCK_MEM_DYNAMIC
   :includes: []
   :mock_prefix: mock_
   :when_no_prototypes: :warn
@@ -121,61 +120,43 @@
     - -I"$": COLLECTION_PATHS_TEST_SUPPORT_SOURCE_INCLUDE_VENDOR
     - "-D$": COLLECTION_DEFINES_TEST_AND_VENDOR
     - "-Wall"
-    - "-Os"
+    - "-fpack-struct"
+    - "-fshort-enums"
+    - "-ffunction-sections"
+    - "-fdata-sections"
+    - "-std=c99"
+    - "-funsigned-char"
+    - "-funsigned-bitfields"
+    - "-DBAUD=#{ENV['BAUD']}"
+    - "-O2"
     :stderr_redirect: :none
     :background_exec: :none
     :optional: false
   :test_linker:
     :executable: avr-gcc
     :arguments:
+    - "-Wl,-Map,MemMapping.map"
     - "-mmcu=#{ENV['MCU']}"
     - -L"$": COLLECTION_PATHS_SUPPORT
     - "${1}"
-    - "-o ${2}.hex"
+    - "-o ${2}"
     - "-lAvrUnitySupport"
     :name: test_linker
     :stderr_redirect: :none
     :background_exec: :none
     :optional: false
   :test_fixture:
-    :executable: "${1}"
-    :name: default_test_fixture
-    :stderr_redirect: :auto
-    :background_exec: :none
-    :optional: false
-    :arguments: []
-  :test_file_preprocessor:
-    :executable: gcc
-    :name: default_test_file_preprocessor
+    :executable: "./upload_hex_to_target.sh"
+    :name: script to upload to target and receive test results
+    :arguments:
+    - "-p=#{ENV['MCU']}"
+    - "-c=#{ENV['PROGRAMMER']}"
+    - "-D"
+    - "-P=#{ENV['SERIAL_PORT']}"
+    - "-U=${1}"
     :stderr_redirect: :none
     :background_exec: :none
     :optional: false
-    :arguments:
-    - "-E"
-    - -I"$": COLLECTION_PATHS_TEST_SUPPORT_SOURCE_INCLUDE_VENDOR
-    - -I"$": COLLECTION_PATHS_TEST_TOOLCHAIN_INCLUDE
-    - "-D$": COLLECTION_DEFINES_TEST_AND_VENDOR
-    - "-D$": DEFINES_TEST_PREPROCESS
-    - "-DGNU_COMPILER"
-    - '"${1}"'
-    - -o "${2}"
-  :test_includes_preprocessor:
-    :executable: gcc
-    :name: default_test_includes_preprocessor
-    :stderr_redirect: :none
-    :background_exec: :none
-    :optional: false
-    :arguments:
-    - "-E"
-    - "-MM"
-    - "-MG"
-    - -I"$": COLLECTION_PATHS_TEST_SUPPORT_SOURCE_INCLUDE_VENDOR
-    - -I"$": COLLECTION_PATHS_TEST_TOOLCHAIN_INCLUDE
-    - "-D$": COLLECTION_DEFINES_TEST_AND_VENDOR
-    - "-D$": DEFINES_TEST_PREPROCESS
-    - "-DGNU_COMPILER"
-    - "-w"
-    - '"${1}"'
 :test_compiler:
   :arguments: []
 :test_linker:

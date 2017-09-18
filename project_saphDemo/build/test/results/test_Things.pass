@@ -1,0 +1,28 @@
+---
+:source:
+  :path: test
+  :file: test_Things.c
+:successes:
+- :test: test_something
+  :line: 3
+  :message: ''
+:failures: []
+:ignores: []
+:counts:
+  :total: 1
+  :passed: 1
+  :failed: 0
+  :ignored: 0
+:stdout:
+- 'options provided:'
+- 'Arguments list:'
+- "-patmega2560 -cwiring -P/dev/ttyACM1 -D -Uflash:w:build/test/out/test_Things.hex:a"
+- 'executing: avrdude -patmega2560 -cwiring -P/dev/ttyACM1 -D -Uflash:w:build/test/out/test_Things.hex:a'
+- ''
+- ''
+- ''
+- 'executing: python uart_test_reader.py /dev/ttyACM1 9600'
+- ''
+- ''
+- ''
+- ''
