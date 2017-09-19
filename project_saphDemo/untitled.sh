@@ -1,9 +1,13 @@
 #!/bin/bash
 
-VAR=$1
+DEBUG="YES"
 
-echo "$VAR"
+if [ $DEBUG == "YES" ]; then
+	echo "debug is yes"
+fi
 
-FILENAME=${VAR%.elf}.hex
+DEBUG="NO"
 
-echo "$FILENAME"
+if [ $DEBUG != "YES" ]; then
+	echo "debug is ungleich yes"
+fi

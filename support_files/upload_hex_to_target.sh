@@ -61,25 +61,25 @@ done
 #avrdude arguments
 args=()
 if [ ! -z "$TARGET" ]; then
-	args+=(-p"$TARGET")
+    args+=(-p"$TARGET")
 fi
 
 if [ ! -z "$PROGRAMMER" ]; then
-	args+=(-c"$PROGRAMMER")
+    args+=(-c"$PROGRAMMER")
 fi
 
 if [ ! -z "$UPLOAD_PORT" ]; then
-	args+=(-P"$UPLOAD_PORT")
+    args+=(-P"$UPLOAD_PORT")
 fi
 
 if [ ! -z "$DISABLE_AUTO_ERASE" ]; then
-	args+=(-D)
+    args+=(-D)
 fi
 
 if [ ! -z "$FILE_TO_FLASH" ]; then
         FILENAME=${FILE_TO_FLASH%.elf}.hex
         avr-objcopy -R .eeprom -R .fuse -R .lock -R .signature -O ihex "$FILE_TO_FLASH" "$FILENAME"
-	args+=(-Uflash:w:$FILENAME:a)
+    args+=(-Uflash:w:$FILENAME:a)
 fi
 
 ##debug
@@ -87,8 +87,8 @@ if [ -z "$TARGET" ] || [ -z "$PROGRAMMER" ] || [ -z "$UPLOAD_PORT" ] || [ -z "$L
         echo "not enough options provided"
         exit 1
 fi
+
+
 avrdude "${args[@]}"
 
-echo "TestListener"
-echo "##############"
 python uart_test_reader.py "$LISTEN_PORT" "$BAUD"
