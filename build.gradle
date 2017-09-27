@@ -27,7 +27,7 @@ task testLocalAll(dependsOn: ['copyProjectLocalYaml', 'ceedlingClobber']){
 	doLast{
 		exec{
 			workingDir ceedlingRootFolder
-			commandLine 'ceedling', 'test:all'
+			commandLine 'ceedling', 'clobber', 'test:all'
 		}
 	}
 }

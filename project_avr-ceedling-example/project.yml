@@ -7,14 +7,12 @@
 
 :project:
   :use_exceptions: FALSE
-  :use_test_preprocessor: FALSE
+  :use_test_preprocessor: TRUE
   :use_auxiliary_dependencies: TRUE
-  :use_mocks: TRUE
   :build_root: build
 #  :release_build: TRUE
   :test_file_prefix: test_
   :which_ceedling: vendor/ceedling
-  options_paths: []
   :default_tasks:
     - test:all
 
@@ -23,24 +21,14 @@
 #  :use_assembly: FALSE
 
 :environment:
-  - :mcu_compiler: atmega328p
-  # - :mcu_avrdude: m2560
-  - :f_cpu: 16000000UL 
-  - :upload_port: /dev/ttyACM1  #################Port via you programm the device
-  - :listen_port: /dev/ttyACM1  #################Port you listen via UART for the test results. can be the same with arduino boards.
-  - :objcopy: avr-objcopy
-  - :programmer: wiring
-  - :baud: 19200
 
 :extension:
-  :executable: .elf
+  :executable: .out
 
 :paths:
   :test:
     - +:test/**
     - -:test/support
-  # :test_include:
-  #   - +:test/support/
   :source:
     - src/**
   :support:
@@ -71,58 +59,14 @@
     uint32:   UINT32
     int8:     INT8
     bool:     UINT8
-  :defines:
-    - CMOCK_MEM_DYNAMIC
 
 :gcov:
     :html_report_type: basic
 
-:tools:
-  :test_compiler:
-    :executable: avr-gcc
-    :name: 'avr compiler, used for testing'
-    :arguments:
-      - -c ${1}
-      - -o ${2}
-      - -DF_CPU=#{ENV['F_CPU']}
-      - -mmcu=#{ENV['MCU_COMPILER']}
-      - -I"$": COLLECTION_PATHS_TEST_TOOLCHAIN_INCLUDE               #expands to -I search paths
-      - -I"$": COLLECTION_PATHS_TEST_SUPPORT_SOURCE_INCLUDE_VENDOR   #expands to -I search paths
-      - -D$: COLLECTION_DEFINES_TEST_AND_VENDOR
-      - -Wall
-      - -fpack-struct
-      - -fshort-enums
-      - -ffunction-sections
-      - -fdata-sections
-      - -std=c99
-      - -funsigned-char
-      - -funsigned-bitfields
-      - -DBAUD=#{ENV['BAUD']}
-      - -O2
-  :test_linker:
-    :executable: avr-gcc
-    :arguments:
-      - -Wl,-Map,MemMapping.map
-      - -mmcu=#{ENV['MCU_COMPILER']}
-      - -L"$": COLLECTION_PATHS_SUPPORT
-      - ${1}
-      - -o ${2}
-      - -lUartSupport
-  :test_fixture:
-    :executable: ./upload_hex_to_target.sh
-    :name: 'script to upload to target and receive test results'
-    :arguments:
-      - -p=#{ENV['MCU_COMPILER']}
-      - -c=#{ENV['PROGRAMMER']}
-      - -U=#{ENV['UPLOAD_PORT']}
-      - -F=${1}
-      - -L=#{ENV['LISTEN_PORT']}
-      - -B=#{ENV['BAUD']}
-      - -D
-
-:unity: #itty bitty processor & toolchain with limited test execution options
-  :defines:
-    - UNITY_INCLUDE_CONFIG_H
+#:tools:
+# Ceedling defaults to using gcc for compiling, linking, etc.
+# As [:tools] is blank, gcc will be used (so long as it's in your system path)
+# See documentation to configure a given toolchain for use
 
 # LIBRARIES
 # These libraries are automatically injected into the build process. Those specified as
@@ -141,7 +85,7 @@
   :load_paths:
     - vendor/ceedling/plugins
   :enabled:
-    #- stdout_pretty_tests_report
+    - stdout_pretty_tests_report
     #- stdout_gtestlike_tests_report
     #- stdout_ide_tests_report
     - module_generator

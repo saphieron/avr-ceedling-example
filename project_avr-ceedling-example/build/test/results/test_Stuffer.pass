@@ -1,7 +1,7 @@
 ---
 :source:
   :path: test
-  :file: test_Things.c
+  :file: test_Stuffer.c
 :successes:
 - :test: test_something
   :line: 3

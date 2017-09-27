@@ -4,7 +4,7 @@
   :use_mocks: true
   :compile_threads: 1
   :test_threads: 1
-  :use_test_preprocessor: false
+  :use_test_preprocessor: true
   :use_deep_dependencies: false
   :test_file_prefix: test_
   :options_paths: []
@@ -12,7 +12,6 @@
   :use_auxiliary_dependencies: true
   :build_root: build
   :which_ceedling: vendor/ceedling
-  options_paths: []
   :default_tasks:
   - test:all
 :release_build:
@@ -37,13 +36,6 @@
   :include: []
 :environment:
 - :rake_columns: '120'
-- :mcu_compiler: atmega328p
-- :f_cpu: 16000000UL
-- :upload_port: "/dev/ttyACM1"
-- :listen_port: "/dev/ttyACM1"
-- :objcopy: avr-objcopy
-- :programmer: wiring
-- :baud: '19200'
 :defines:
   :test:
   - &1 []
@@ -71,7 +63,7 @@
   :source: ".c"
   :assembly: ".s"
   :object: ".o"
-  :executable: ".elf"
+  :executable: ".out"
   :map: ".map"
   :list: ".lst"
   :testpass: ".pass"
@@ -79,12 +71,10 @@
   :dependencies: ".d"
 :unity:
   :vendor_path: "/home/saphieron/git/avr-ceedling-example/project_avr-ceedling-example/vendor/ceedling/vendor"
-  :defines:
-  - UNITY_INCLUDE_CONFIG_H
+  :defines: []
 :cmock:
   :vendor_path: "/home/saphieron/git/avr-ceedling-example/project_avr-ceedling-example/vendor/ceedling/vendor"
-  :defines:
-  - CMOCK_MEM_DYNAMIC
+  :defines: []
   :includes: []
   :mock_prefix: mock_
   :when_no_prototypes: :warn
@@ -109,56 +99,69 @@
   :file_suffix: _runner
 :tools:
   :test_compiler:
-    :executable: avr-gcc
-    :name: avr compiler, used for testing
+    :executable: gcc
+    :name: default_test_compiler
+    :stderr_redirect: :none
+    :background_exec: :none
+    :optional: false
     :arguments:
-    - "-c ${1}"
-    - "-o ${2}"
-    - "-DF_CPU=#{ENV['F_CPU']}"
-    - "-mmcu=#{ENV['MCU_COMPILER']}"
-    - -I"$": COLLECTION_PATHS_TEST_TOOLCHAIN_INCLUDE
     - -I"$": COLLECTION_PATHS_TEST_SUPPORT_SOURCE_INCLUDE_VENDOR
+    - -I"$": COLLECTION_PATHS_TEST_TOOLCHAIN_INCLUDE
     - "-D$": COLLECTION_DEFINES_TEST_AND_VENDOR
-    - "-Wall"
-    - "-fpack-struct"
-    - "-fshort-enums"
-    - "-ffunction-sections"
-    - "-fdata-sections"
-    - "-std=c99"
-    - "-funsigned-char"
-    - "-funsigned-bitfields"
-    - "-DBAUD=#{ENV['BAUD']}"
-    - "-O2"
-    :stderr_redirect: :none
-    :background_exec: :none
-    :optional: false
-  :test_linker:
-    :executable: avr-gcc
-    :arguments:
-    - "-Wl,-Map,MemMapping.map"
-    - "-mmcu=#{ENV['MCU_COMPILER']}"
-    - -L"$": COLLECTION_PATHS_SUPPORT
-    - "${1}"
-    - "-o ${2}"
-    - "-lUartSupport"
-    :name: test_linker
-    :stderr_redirect: :none
-    :background_exec: :none
-    :optional: false
+    - "-DGNU_COMPILER"
+    - "-g"
+    - -c "${1}"
+    - -o "${2}"
   :test_fixture:
-    :executable: "./upload_hex_to_target.sh"
-    :name: script to upload to target and receive test results
-    :arguments:
-    - "-p=#{ENV['MCU_COMPILER']}"
-    - "-c=#{ENV['PROGRAMMER']}"
-    - "-U=#{ENV['UPLOAD_PORT']}"
-    - "-F=${1}"
-    - "-L=#{ENV['LISTEN_PORT']}"
-    - "-B=#{ENV['BAUD']}"
-    - "-D"
+    :executable: "${1}"
+    :name: default_test_fixture
+    :stderr_redirect: :auto
+    :background_exec: :none
+    :optional: false
+    :arguments: []
+  :test_linker:
+    :executable: gcc
+    :name: default_test_linker
     :stderr_redirect: :none
     :background_exec: :none
     :optional: false
+    :arguments:
+    - '"${1}"'
+    - -o "${2}"
+    - ''
+    - "${4}"
+  :test_file_preprocessor:
+    :executable: gcc
+    :name: default_test_file_preprocessor
+    :stderr_redirect: :none
+    :background_exec: :none
+    :optional: false
+    :arguments:
+    - "-E"
+    - -I"$": COLLECTION_PATHS_TEST_SUPPORT_SOURCE_INCLUDE_VENDOR
+    - -I"$": COLLECTION_PATHS_TEST_TOOLCHAIN_INCLUDE
+    - "-D$": COLLECTION_DEFINES_TEST_AND_VENDOR
+    - "-D$": DEFINES_TEST_PREPROCESS
+    - "-DGNU_COMPILER"
+    - '"${1}"'
+    - -o "${2}"
+  :test_includes_preprocessor:
+    :executable: gcc
+    :name: default_test_includes_preprocessor
+    :stderr_redirect: :none
+    :background_exec: :none
+    :optional: false
+    :arguments:
+    - "-E"
+    - "-MM"
+    - "-MG"
+    - -I"$": COLLECTION_PATHS_TEST_SUPPORT_SOURCE_INCLUDE_VENDOR
+    - -I"$": COLLECTION_PATHS_TEST_TOOLCHAIN_INCLUDE
+    - "-D$": COLLECTION_DEFINES_TEST_AND_VENDOR
+    - "-D$": DEFINES_TEST_PREPROCESS
+    - "-DGNU_COMPILER"
+    - "-w"
+    - '"${1}"'
 :test_compiler:
   :arguments: []
 :test_linker:
@@ -184,8 +187,10 @@
   :load_paths:
   - vendor/ceedling/plugins
   :enabled:
+  - stdout_pretty_tests_report
   - module_generator
-  :display_raw_test_results: true
+  :display_raw_test_results: false
+  :stdout_pretty_tests_report_path: vendor/ceedling/plugins/stdout_pretty_tests_report/lib
   :module_generator_path: vendor/ceedling/plugins/module_generator/lib
 :gcov:
   :html_report_type: basic

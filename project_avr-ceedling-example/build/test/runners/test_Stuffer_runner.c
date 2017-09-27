@@ -45,7 +45,7 @@ void resetTest(void)
 /*=======MAIN=====*/
 int main(void)
 {
-  UnityBegin("test_Things.c");
+  UnityBegin("test_Stuffer.c");
   RUN_TEST(test_something, 3);
 
   return (UnityEnd());
