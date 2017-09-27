@@ -1,0 +1,4 @@
+See file:///home/saphieron/git/avr-ceedling-example/build/tmp/compileUartSupportStaticLibraryUartSupportC/output.txt for all output for compileUartSupportStaticLibraryUartSupportC.
+compiling uart_output.c successful.
+
+Finished compileUartSupportStaticLibraryUartSupportC, see full log file:///home/saphieron/git/avr-ceedling-example/build/tmp/compileUartSupportStaticLibraryUartSupportC/output.txt.

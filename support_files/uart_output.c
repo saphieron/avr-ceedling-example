@@ -13,23 +13,15 @@
 //#define UART_EVALUATOR(X,Y) UART_PASTER(X,Y)
 //#define UART_CONSTRUCTOR(VAR) UART_EVALUATOR(VAR, UART_PORT)
 
-#define BAUD 9600
-
 #define UART_UBRRn UBRR0
 #define UART_UCSRnA UCSR0A
 #define UART_UCSRnB UCSR0B
 #define UART_UCSRnC UCSR0C
 #define UART_TXENn TXEN0
-#define UART_RXENn RXEN0
-#define UART_TXCIEn TXCIE0
-#define UART_RXCIEn RXCIE0
 #define UART_UCSZn0 UCSZ00
 #define UART_USBSn USBS0
-#define UART_RXCn RXC0
 #define UART_UDRn UDR0
 #define UART_UDREn UDRE0
-#define USARTn_TX_vect USART0_TX_vect
-#define USARTn_RX_vect USART0_RX_vect
 
 void uart_init(uint32_t f_cpu, uint32_t baud) {
 	uint16_t ubrrVal = (f_cpu + 8 * baud) / (16 * baud - 1);

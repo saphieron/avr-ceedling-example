@@ -1,0 +1,4 @@
+See file:///home/saphieron/git/avr-ceedling-example/build/tmp/createUartSupportStaticLibrary/output.txt for all output for createUartSupportStaticLibrary.
+archiving libUartSupport.a successful.
+
+Finished createUartSupportStaticLibrary, see full log file:///home/saphieron/git/avr-ceedling-example/build/tmp/createUartSupportStaticLibrary/output.txt.

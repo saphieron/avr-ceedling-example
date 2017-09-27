@@ -1,0 +1,169 @@
+/*Project properties  */
+def ceedlingRootFolder = 'project_' + project.name
+def targetDevice = 'atmega328p' // Target device name according to avr-gcc
+
+/*Internal settings. Please DO NOT change unless you know what you are doing*/
+def ceedlingProjectYaml = ceedlingRootFolder + '/' + 'project.yml'
+def supportLibraryOutputFolder = ceedlingRootFolder + '/test/support'
+def supportSourceFolder = 'support_files'
+def configurationsFolder = 'configuration_files'
+
+task createCeedlingFolderStructure{
+	doLast{
+		exec{
+			workingDir '.'
+			commandLine 'ceedling', 'new', ceedlingRootFolder	
+		}
+	}
+}
+
+task copyProjectLocalYaml(type: Copy){
+		from configurationsFolder + '/local.yml'
+		into ceedlingRootFolder + '/'
+		rename ('local.yml', 'project.yml')
+}
+
+task testLocalAll(dependsOn: ['copyProjectLocalYaml', 'ceedlingClobber']){
+	doLast{
+		exec{
+			workingDir ceedlingRootFolder
+			commandLine 'ceedling', 'test:all'
+		}
+	}
+}
+
+task copyProjectTargetYaml(dependsOn: 'copyBuiltSupportLib'){
+	doLast{
+		copy{
+			from(configurationsFolder + ''){
+				include 'target.yml'
+			}
+			into ceedlingRootFolder + '/'
+			rename ('target.yml', 'project.yml')
+		}
+	}
+}
+
+task testTargetAll(dependsOn: ['copyProjectTargetYaml','ceedlingClobber']){
+	doLast{
+		exec{
+			workingDir ceedlingRootFolder
+			commandLine 'ceedling', 'verbosity[4]', 'test:all'
+		}
+	}
+}
+
+task ceedlingClobber{
+	doLast{		
+		exec{
+			workingDir ceedlingRootFolder
+			commandLine 'ceedling', 'clobber'
+		}
+	}
+}
+
+/*task copyBuiltSupportLib(dependsOn: 'buildSupportLibs'){*/
+task copyBuiltSupportLib(dependsOn: 'UartSupportStaticLibrary'){
+	doLast{
+		copy{
+			from('build/libs/uartSupport/static/'){
+				include 'libUartSupport.a'
+				
+			}
+			from(supportSourceFolder + '/'){
+				include 'uart_output.h'
+				include 'unity_config.h'
+			}
+			into supportLibraryOutputFolder + '/'			
+		}
+	}
+}
+
+/*task copyBuiltSupportHeaders(dependsOn: 'copyBuiltSupportLib'){
+	doLast{
+		copy{
+			from(supportSourceFolder + '/'){
+				include 'uart_output.h'
+			}
+			into supportLibraryOutputFolder + '/'
+		}
+	}
+}*/
+
+
+/*C compilation tasks for building support uart library for same platform as target*/
+
+apply plugin: "c"
+
+model {
+	platforms {
+		avr {
+			architecture "avr"
+		}
+	}
+
+	toolChains {
+		gcc(Gcc) {
+			target("avr") {
+				cCompiler.executable = "avr-gcc"
+				cCompiler.withArguments {args ->
+					args << "-mmcu=" + targetDevice
+				}
+				cCompiler.withArguments {args ->
+					args << "-DF_CPU=16000000UL"
+				}
+				linker.executable = "avr-gcc"
+				linker.withArguments {args ->
+					args << "-mmcu=" + targetDevice << "-mrelax"
+				}
+				staticLibArchiver.executable = "avr-ar"
+				staticLibArchiver.withArguments{ args ->
+					println "----> avr-ar args: " + args
+				}
+			}
+		}
+	}
+
+	buildTypes {
+		release
+	}
+
+	binaries {
+		all {
+			cCompiler.args "-Wall"
+			cCompiler.args "-g2", "-gstabs"
+			cCompiler.args "-fpack-struct", "-fshort-enums", "-ffunction-sections", "-fdata-sections"
+			cCompiler.args "-funsigned-char", "-funsigned-bitfields"
+			cCompiler.args "-std=c99"
+			if (buildType == buildTypes.release) {
+				cCompiler.args "-O2"
+			}
+			linker.args "-Wl,--gc-sections"
+		}
+	}
+
+	components{
+		UartSupport(NativeLibrarySpec){	
+			targetPlatform "avr"
+			sources {
+				c {
+					source {
+						srcDir supportSourceFolder
+						include "uart_output.c"
+					}
+				}
+			}
+
+			binaries.withType(SharedLibraryBinarySpec) {
+				buildable = false
+			}
+		}
+	}
+
+
+	tasks {
+		UartSupportStaticLibrary{
+			dependsOn clean
+		}
+	}
+}
