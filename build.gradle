@@ -8,6 +8,10 @@ def supportLibraryOutputFolder = ceedlingRootFolder + '/test/support'
 def supportSourceFolder = 'support_files'
 def configurationsFolder = 'configuration_files'
 
+/*
+Callable/usable tasks
+*/
+
 task createCeedlingFolderStructure{
 	doLast{
 		exec{
@@ -17,19 +21,32 @@ task createCeedlingFolderStructure{
 	}
 }
 
-task copyProjectLocalYaml(type: Copy){
-		from configurationsFolder + '/local.yml'
-		into ceedlingRootFolder + '/'
-		rename ('local.yml', 'project.yml')
-}
-
-task testLocalAll(dependsOn: ['copyProjectLocalYaml', 'ceedlingClobber']){
+task testLocalAll(dependsOn: 'copyProjectLocalYaml'){
 	doLast{
 		exec{
+			ignoreExitValue = true
 			workingDir ceedlingRootFolder
 			commandLine 'ceedling', 'clobber', 'test:all'
 		}
 	}
+}
+
+task testTargetAll(dependsOn: 'copyProjectTargetYaml'){
+	doLast{
+		exec{
+			ignoreExitValue = true
+			workingDir ceedlingRootFolder
+			commandLine 'ceedling', 'clobber', 'test:all'
+		}
+	}
+}
+
+//Internal tasks
+
+task copyProjectLocalYaml(type: Copy){
+		from configurationsFolder + '/local.yml'
+		into ceedlingRootFolder + '/'
+		rename ('local.yml', 'project.yml')
 }
 
 task copyProjectTargetYaml(dependsOn: 'copyBuiltSupportLib'){
@@ -44,25 +61,7 @@ task copyProjectTargetYaml(dependsOn: 'copyBuiltSupportLib'){
 	}
 }
 
-task testTargetAll(dependsOn: ['copyProjectTargetYaml','ceedlingClobber']){
-	doLast{
-		exec{
-			workingDir ceedlingRootFolder
-			commandLine 'ceedling', 'verbosity[4]', 'test:all'
-		}
-	}
-}
 
-task ceedlingClobber{
-	doLast{		
-		exec{
-			workingDir ceedlingRootFolder
-			commandLine 'ceedling', 'clobber'
-		}
-	}
-}
-
-/*task copyBuiltSupportLib(dependsOn: 'buildSupportLibs'){*/
 task copyBuiltSupportLib(dependsOn: 'UartSupportStaticLibrary'){
 	doLast{
 		copy{
@@ -78,17 +77,6 @@ task copyBuiltSupportLib(dependsOn: 'UartSupportStaticLibrary'){
 		}
 	}
 }
-
-/*task copyBuiltSupportHeaders(dependsOn: 'copyBuiltSupportLib'){
-	doLast{
-		copy{
-			from(supportSourceFolder + '/'){
-				include 'uart_output.h'
-			}
-			into supportLibraryOutputFolder + '/'
-		}
-	}
-}*/
 
 
 /*C compilation tasks for building support uart library for same platform as target*/
