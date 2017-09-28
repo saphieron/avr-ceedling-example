@@ -1,2 +1,4 @@
 ./project_saphDemo/build/*
-./project_saphDemo/build/**/*	
+./project_saphDemo/build/**/*
+./.gradle/*
+./.gradle/**/*

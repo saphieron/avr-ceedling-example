@@ -12,6 +12,8 @@ def configurationsFolder = 'configuration_files'
 Callable/usable tasks
 */
 
+
+//Construction/init task
 task initCeedling{
 	doLast{
 		exec{
@@ -25,6 +27,7 @@ configure(initCeedling){
 	description = 'creates initial folder structure for a ceedling project'
 }
 
+//Local tests
 task testLocalAll(dependsOn: 'copyProjectLocalYaml'){
 	doLast{
 		exec{
@@ -53,7 +56,7 @@ configure(testLocalSingle){
 	description = 'run a subset or single test on the target. Allows for regex. To use: gradle testTargetSingle -P<testFileRegex>'
 }
 
-
+//Target tests
 task testTargetAll(dependsOn: 'copyProjectTargetYaml'){
 	doLast{
 		exec{
