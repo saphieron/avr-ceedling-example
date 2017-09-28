@@ -12,13 +12,17 @@ def configurationsFolder = 'configuration_files'
 Callable/usable tasks
 */
 
-task createCeedlingFolderStructure{
+task initCeedling{
 	doLast{
 		exec{
 			workingDir '.'
 			commandLine 'ceedling', 'new', ceedlingRootFolder	
 		}
 	}
+}
+configure(initCeedling){
+	group = 'Ceedling'
+	description = 'creates initial folder structure for a ceedling project'
 }
 
 task testLocalAll(dependsOn: 'copyProjectLocalYaml'){
@@ -30,6 +34,25 @@ task testLocalAll(dependsOn: 'copyProjectLocalYaml'){
 		}
 	}
 }
+configure(testLocalAll){
+	group = 'Ceedling'
+	description = 'run all tests on the local machine'
+}
+
+task testLocalSingle(dependsOn: 'copyProjectLocalYaml'){
+	def testFile = project.hasProperty("testfile") ? project.testfile : ''
+	doLast{
+		exec{
+			workingDir ceedlingRootFolder
+			commandLine 'ceedling', 'clobber', 'test:' + testfile
+		}
+	}
+}
+configure(testLocalSingle){
+	group = 'Ceedling'
+	description = 'run a subset or single test on the target. Allows for regex. To use: gradle testTargetSingle -P<testFileRegex>'
+}
+
 
 task testTargetAll(dependsOn: 'copyProjectTargetYaml'){
 	doLast{
@@ -40,6 +63,25 @@ task testTargetAll(dependsOn: 'copyProjectTargetYaml'){
 		}
 	}
 }
+configure(testTargetAll){
+	group = 'Ceedling'
+	description = 'run all tests on the target'
+}
+
+task testTargetSingle(dependsOn: 'copyProjectTargetYaml'){
+	def testFile = project.hasProperty("testfile") ? project.testfile : ''
+	doLast{
+		exec{
+			workingDir ceedlingRootFolder
+			commandLine 'ceedling', 'clobber', 'test:' + testfile
+		}
+	}
+}
+configure(testTargetSingle){
+	group = 'Ceedling'
+	description = 'run a subset or single test on the target. Allows for regex. To use: gradle testTargetSingle -P<testFileRegex>'
+}
+
 
 //Internal tasks
 
@@ -78,9 +120,7 @@ task copyBuiltSupportLib(dependsOn: 'UartSupportStaticLibrary'){
 	}
 }
 
-
 /*C compilation tasks for building support uart library for same platform as target*/
-
 apply plugin: "c"
 
 model {
