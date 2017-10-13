@@ -45,7 +45,6 @@ filename = os.path.splitext(InputBinaryFile)[0] + ".hex"
 call(["avr-objcopy", "-R", ".eeprom", "-R", ".fuse", "-R", ".lock", "-R", ".signature", "-O", "ihex", InputBinaryFile, filename])
 
 #Call avrdude to upload .hex file
-
 if DisableAutoErase:
 	call(["avrdude", "-p", TargetDevice, "-c", Programmer, "-P", UploadPort, "-D", "-Uflash:w:"+filename+":a"])
 else:
@@ -62,22 +61,3 @@ while True:
 		sys.exit(0)
 	else:
 		print lineRead
-
-
-# parser = argparse.ArgumentParser(description='Upload compiled binary to target AVR device')
-
-# TargetDevice = ""
-# Programmer = ""
-# UploadPort= ""
-# DisableAutoErase=False
-
-# for x in range(0, len(sys.argv):
-
-
-# if argumentLength < 3:
-# 	print 'not enough arguments. Usage: python uart_test_reader.py <SerialPort> <BaudRate>'
-# 	sys.exit(0)
-
-# PORT = sys.argv[1]
-# BAUD = sys.argv[2]
-
