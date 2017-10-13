@@ -14,5 +14,5 @@ c
 -O2
 -I
 /home/saphieron/git/avr-ceedling-example/src/UartSupport/headers
--mmcu=atmega328p
+-mmcu=atmega2560
 -DF_CPU=16000000UL

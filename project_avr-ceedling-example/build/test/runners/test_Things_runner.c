@@ -22,6 +22,7 @@
 #include "unity.h"
 #include <setjmp.h>
 #include <stdio.h>
+#define UNITY_INCLUDE_CONFIG_H
 
 int GlobalExpectCount;
 int GlobalVerifyOrder;

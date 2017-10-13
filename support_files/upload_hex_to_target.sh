@@ -91,4 +91,4 @@ fi
 
 avrdude "${args[@]}"
 
-python uart_test_reader.py "$LISTEN_PORT" "$BAUD"
+python ../support_files/uart_test_reader.py "$LISTEN_PORT" "$BAUD"
