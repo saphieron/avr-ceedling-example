@@ -10,3 +10,10 @@ For personal reasons this is wrapped with a small gradle configuration, to be ab
 	* Unity:: 2.4.1.120
 * Gradle:: 4.2
 * Python:: 2.7.12
+* Ubuntu 16.04 (Linux Mint 18.1)
+
+
+### Things to consider when getting started
+Currently there are 2 (actually 3) configuration files that need to be checked, set when using this toolchain: The Gradle config file "gradle.build" and the 2 ceedling files configuration_files/local.yml and configuration_files/local.yml. local.yml does not need to be changed as nearly all of its settings have been copied from the default ceedling settings. When trying to run tests on the target however you need to adapt the device description, e.g. 'atmega328p' or 'atmega2560' in both the gradle.build and the target.yml files. In future versions gradle should update the target.yml automatically so you only need to set that information in one file. 
+
+To set up the target compiler, i.e. avr-gcc, according to your OS you can do so in the target.yml. Consider checking https://github.com/ThrowTheSwitch/Ceedling/blob/master/docs/CeedlingPacket.md for a much more detailed explanation.
